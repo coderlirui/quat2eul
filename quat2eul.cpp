@@ -89,14 +89,14 @@ int main(int argc, char **argv)
     stringstream s3(argv[3]);
     stringstream s4(argv[4]);
     stringstream s5(argv[5]);
-    s1 >> mode;	// mode "ind, 4 or d"
+    s1 >> mode;
     s2 >> seq;
 		s3 >> q[1];
 		s4 >> q[2];
 		s5 >> q[3];
 
 	//  first to are unit-q, so get real part; in case of '4' normalize if neccessary
-	if(!mode.compare("ind")){
+	if(!mode.compare("ind")){// ind mode
 		q[0] = sqrt(1. - q[1]*q[1] - q[2]*q[2] - q[3]*q[3]);
 		cout<<"your q = ["<< q[0]<< ", "<< q[1] << ", "<<q[2] <<", "<<q[3]<<"]" <<endl;
 	} else if(!mode.compare("ind")){
