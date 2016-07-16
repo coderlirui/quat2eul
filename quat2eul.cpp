@@ -62,19 +62,18 @@ void rad2deg(double* rads) {
 
 // user output
 void printInfo(){
-  printf("arg1: 'img' imaginary parts of a unit-quaternion\n");
-  printf("            and converts it to Euler angles\n");
-  printf("      'ind' constructs a unit-quaternion from input angles in rad\n");
-  printf("      'largeq'   specify a full quaternion q = [q0, q1, q2, q3] any length\n");
-  printf("arg2: zyx or xyz rotation sequence\n");
-  printf("arg3: q1\n");
-  printf("arg4: q2\n");
-  printf("arg5: q3\n");
-  printf("[arg6: q0 (largeq)]\n");
-  printf("  e.g.: ./quat2eul ind zyx 1 0 0\n");
-  printf("convention: i-axis having psi, j-axis having theta, k-axis having phi\n");
-  printf("psi is always the first angle to rotate with, then theta and at last phi\n");
-  printf("R(psi,theta,phi) = R_k(phi) R_j(theta) R_i(psi)\n");
+  printf("$ ./quat2eul <arg1-6> converts quaternions to euler-angles.\n");
+  printf(" arg1: 'img'    imaginary part of a unit-quaternion q = [q1, q2, q3]\n");
+  printf("       'largeq' specify a full quaternion q = [q1, q2, q3, q0] of any length\n");
+  printf(" arg2: zyx or xyz rotation sequence\n");
+  printf(" arg3: q1\n");
+  printf(" arg4: q2\n");
+  printf(" arg5: q3\n");
+  printf("[arg6: q0 (largeq)]\n\n");
+  printf("for example $ ./quat2eul img zyx 0 0 0.7071\n");
+  printf("convention: i-axis has psi, j-axis has theta, k-axis has phi\n");
+  printf(" psi is always the first angle to rotate with, then theta and lastly phi\n");
+  printf(" R(psi,theta,phi) = R_k(phi) R_j(theta) R_i(psi)\n");
 }
 
 // handle I/O stream, functions compute euler-angles
@@ -99,46 +98,39 @@ int main(int argc, char **argv)
   s4 >> q[2];
   s5 >> q[3];
 
-  if(mode.compare("img")){// we have imaginary part of unit-q
+  if (argc == 6){// we have imaginary part of unit-q
     q[0] = sqrt(1. - q[1]*q[1] - q[2]*q[2] - q[3]*q[3]);
-    printf("your q = [%f, %f, %f, %f]", q[0], q[1], q[2], q[3]);
-
-  } else if(mode.compare("ind")){// we have rad angles and want the q
-    q[1] = sin(q[1]/2.);
-    q[2] = sin(q[2]/2.);
-    q[3] = sin(q[3]/2.);
-    q[0] = sqrt(1. - q[1]*q[1] - q[2]*q[2] - q[3]*q[3]);
-    printf("your q = [%f, %f, %f, %f]", q[0], q[1], q[2], q[3]);
+    printf("your q = [%f, %f, %f, %f] \n", q[0], q[1], q[2], q[3]);
 
   } else if (argc == 7){// we also have real part
     stringstream s6(argv[6]);
     s6 >> q[0];
-
     // normalize with euklidean-norm if ||q|| != 1
     double q_norm2 = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
     if(q_norm2 != 1) {
       for(int i = 0; i<4; i++) {
         q[i] /= q_norm2;
       }
-      printf("unit q = [%f, %f, %f, %f]", q[0], q[1], q[2], q[3]);
+      printf("unit q = [%f, %f, %f, %f] \n", q[0], q[1], q[2], q[3]);
     }
-    printf("your q = [%f, %f, %f, %f]", q[0], q[1], q[2], q[3]);
+    printf("your q = [%f, %f, %f, %f] \n", q[0], q[1], q[2], q[3]);
+
   } else {
-    cout<<"input failed"<<endl;
+    printf("meh...input failed \n");
     exit(1);
   }
 
   // unit-q is known, call functions to convert to euler-angles
   if (seq.compare("xyz")) {
     quat2eulerxyz(q);
-  } else if (seq.compare("xyz")) {
+  } else if (seq.compare("zyx")) {
     quat2eulerzyx(q);
   }
 
   // output the euler-angles
-  printf("The euler angles psi, theta, phi for sequence %s are: ", seq.c_str());
-  printf("rad %f, %f, %f", q[1], q[2], q[3]);
+  printf("The euler angles psi, theta, phi for sequence %s are: \n", seq.c_str());
+  printf("rad %f, %f, %f \n", q[1], q[2], q[3]);
   rad2deg(q);
-  printf("deg %f, %f, %f", q[1], q[2], q[3]);
+  printf("deg %f, %f, %f \n", q[1], q[2], q[3]);
 }
 // EOF
