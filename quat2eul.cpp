@@ -13,6 +13,8 @@
 // Source https://scholar.google.de/scholar?cluster=3204262265835591787
 //        http://de.mathworks.com/help/robotics/ref/quat2eul.html
 //
+// TODO verify other sequences from Fullers spincalc
+//
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -22,35 +24,64 @@
 
 using namespace std;
 
-// quaternation to euler in ZYX (seq:321)
-double* quat2eulerzyx(double* q){
-
-  // euler-angles
-  double psi = atan2( 2.*(q[1]*q[2] + q[0]*q[3]) , q[0]*q[0] + q[1]*q[1]- q[2]*q[2] - q[3]*q[3]);
-  double theta = asin( -2.*(q[1]*q[3] - q[0]*q[2]));
-  double phi = atan2( 2.*(q[2]*q[3] + q[0]*q[1]) , q[0]*q[0] - q[1]*q[1]- q[2]*q[2] + q[3]*q[3]);
-
-  // conventional: R(psi,theta,phi) = R_k(phi) R_j(theta) R_i(psi),
-  // so psi is always the first angle to rotate with, then theta and last phi
-  q[1] = psi;
-  q[2] = theta;
-  q[3] = phi;//
-  return q;
+// user output
+void printInfo(){
+  printf("$ ./quat2eul <arg1-5> converts quaternion to euler-angle sequence.\n");
+  // printf(" arg1: xyz, yzx, zxy, xzy, yxz, zyx rotation sequence (J. Fuller SpinCalc)\n");
+  printf(" arg1: rotation sequence (Matlab analog)\n");
+  printf(" arg2: q1\n");
+  printf(" arg3: q2\n");
+  printf(" arg4: q3\n");
+  printf("[arg5: q0 (largeq)]\n");
+  printf("for example $ ./quat2eul zyx 0 0 0.7071\n");
+  printf("convention: i-axis has psi, j-axis has theta, k-axis has phi\n");
+  printf(" psi is always the first angle, then theta and lastly phi\n");
+  printf(" the rotation is a right-handed helix\n");
+  printf(" R(psi,theta,phi) = R_k(phi) R_j(theta) R_i(psi)\n");
 }
 
-// quaternation to euler in XYZ (seq:123)
-double* quat2eulerxyz(double* q){
+// quaternation to euler, from John Fullers SpinCalc Matlab-Function
+void quat2eul(string seq, double* q){
+  double psi = 0;
+  double theta = 0;
+  double phi = 0;
 
-  //euler-angles
-  double psi = atan2( -2.*(q[2]*q[3] - q[0]*q[1]) , q[0]*q[0] - q[1]*q[1]- q[2]*q[2] + q[3]*q[3]);
-  double theta = asin( 2.*(q[1]*q[3] + q[0]*q[2]));
-  double phi = atan2( 2.*(-q[1]*q[2] + q[0]*q[3]) , q[0]*q[0] + q[1]*q[1] - q[2]*q[2] - q[3]*q[3]);
-
-  //save var. by simply pushing them back into the array and return
+  // if (seq.compare("xyz") == 0) {
+  //   psi=atan2(2*(q[0] *q[3] -q[1] *q[2] ),(q[3] *q[3] -q[0] *q[0] -q[1] *q[1] +q[2] *q[2] ));
+  //   theta=asin(2*(q[0] *q[2] +q[1] *q[3] ));
+  //   phi=atan2(2*(q[2] *q[3] -q[0] *q[1] ),(q[3] *q[3] +q[0] *q[0] -q[1] *q[1] -q[2] *q[2] ));
+  // } else if (seq.compare("yzx") == 0) {
+  //   psi=atan2(2*(q[1] *q[3] -q[0] *q[2] ),(q[3] *q[3] +q[0] *q[0] -q[1] *q[1] -q[2] *q[2] ));
+  //   theta=asin(2*(q[0] *q[1] +q[2] *q[3] ));
+  //   phi=atan2(2*(q[0] *q[3] -q[2] *q[1] ),(q[3] *q[3] -q[0] *q[0] +q[1] *q[1] -q[2] *q[2] ));
+  // } else if (seq.compare("zxy") == 0) {
+  //   psi=atan2(2*(q[2] *q[3] -q[0] *q[1] ),(q[3] *q[3] -q[0] *q[0] +q[1] *q[1] -q[2] *q[2] ));
+  //   theta=asin(2*(q[0] *q[3] +q[1] *q[2] ));
+  //   phi=atan2(2*(q[1] *q[3] -q[2] *q[0]),(q[3] *q[3] -q[0] *q[0] -q[1] *q[1] +q[2] *q[2] ));
+  // } else if (seq.compare("xzy") == 0) {
+  //   psi=atan2(2*(q[0] *q[3] +q[1] *q[2] ),(q[3] *q[3] -q[0] *q[0] +q[1] *q[1] -q[2] *q[2] ));
+  //   theta=asin(2*(q[2] *q[3] -q[0] *q[1] ));
+  //   phi=atan2(2*(q[0] *q[2] +q[1] *q[3] ),(q[3] *q[3] +q[0] *q[0] -q[1] *q[1] -q[2] *q[2] ));
+  // } else if (seq.compare("yxz") == 0) {
+  //   psi=atan2(2*(q[0] *q[2] +q[1] *q[3] ),(q[3] *q[3] -q[0] *q[0] -q[1] *q[1] +q[2] *q[2] ));
+  //   theta=asin(2*(q[0] *q[3] -q[1] *q[2] ));
+  //   phi=atan2(2*(q[0] *q[1] +q[2] *q[3] ),(q[3] *q[3] -q[0] *q[0] +q[1] *q[1] -q[2] *q[2] ));
+  if (seq.compare("zyx") == 0) {
+    // psi=atan2(2*(q[0] *q[1] +q[2] *q[3] ),(q[3] *q[3] +q[0] *q[0] -q[1] *q[1] -q[2] *q[2] ));
+    // theta=asin(2*(q[1] *q[3] -q[0] *q[2] ));
+    // phi=atan2(2*(q[0] *q[3] +q[2] *q[1] ),(q[3] *q[3] -q[0] *q[0] -q[1] *q[1] +q[2] *q[2] ));
+    // matlab way:
+    psi = atan2( 2.*(q[1]*q[2] + q[0]*q[3]) , q[0]*q[0] + q[1]*q[1]- q[2]*q[2] - q[3]*q[3]);
+    theta = asin( 2.*( - q[1]*q[3] + q[0]*q[2]));
+    phi = atan2( 2.*(q[2]*q[3] + q[0]*q[1]) , q[0]*q[0] - q[1]*q[1]- q[2]*q[2] + q[3]*q[3]);
+  } else {
+    printf("meh...sequence not supported.\n");
+    exit(1);
+  }
+  //save var. by pushing them back into the array
   q[1] = psi;
   q[2] = theta;
   q[3] = phi;
-  return q;
 }
 
 //rad to deg
@@ -58,20 +89,6 @@ void rad2deg(double* rads) {
   rads[1] *= (180./M_PI);
   rads[2] *= (180./M_PI);
   rads[3] *= (180./M_PI);
-}
-
-// user output
-void printInfo(){
-  printf("$ ./quat2eul <arg1-5> converts quaternion to euler-angle sequence.\n");
-  printf(" arg1: zyx or xyz rotation sequence\n");
-  printf(" arg2: q1\n");
-  printf(" arg3: q2\n");
-  printf(" arg4: q3\n");
-  printf("[arg5: q0 (largeq)]\n\n");
-  printf("for example $ ./quat2eul zyx 0 0 0.7071\n");
-  printf("convention: i-axis has psi, j-axis has theta, k-axis has phi\n");
-  printf(" psi is always the first angle to rotate with, then theta and lastly phi\n");
-  printf(" R(psi,theta,phi) = R_k(phi) R_j(theta) R_i(psi)\n");
 }
 
 // handle I/O stream, functions compute euler-angles
@@ -93,11 +110,11 @@ int main(int argc, char **argv)
   s3 >> q[2];
   s4 >> q[3];
 
-  if (argc == 5){// we have imaginary part of unit-q
+  if (argc == 5) {// we have imaginary part of unit-q
     q[0] = sqrt(1. - q[1]*q[1] - q[2]*q[2] - q[3]*q[3]);
     printf("your q = [%f, %f, %f, %f] \n", q[0], q[1], q[2], q[3]);
 
-  } else if (argc == 6){// we also have real part
+  } else if (argc == 6) {// we also have real part
     stringstream s5(argv[5]);
     s5 >> q[0];
     // normalize with euklidean-norm if ||q|| != 1
@@ -109,21 +126,10 @@ int main(int argc, char **argv)
       printf("unit q = [%f, %f, %f, %f] \n", q[0], q[1], q[2], q[3]);
     }
     printf("your q = [%f, %f, %f, %f] \n", q[0], q[1], q[2], q[3]);
-
-  } else {
-    printf("meh...input failed \n");
-    exit(1);
   }
 
   // unit-q is known, call functions to convert to euler-angles
-  if (seq.compare("xyz") == 0) {
-    quat2eulerxyz(q);
-  } else if (seq.compare("zyx")  == 0) {
-    quat2eulerzyx(q);
-  } else {
-    printf("meh...sequence to supported\n");
-    exit(1);
-  }
+  quat2eul(seq,q);
 
   // output the euler-angles
   printf("angles psi, theta, phi for %s are in \n", seq.c_str());
