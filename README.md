@@ -1,22 +1,11 @@
 ### quat2eul
 ![cmd](Image.png)
 
-
  - Similar to Matlab but runs from the command line.
- - Supported rotation sequences: ZYX, 
-   more Info: [quat2eul.cpp](quat2eul.cpp)
-
- - order of the angles stays the same no matter the ijk-sequence, so psi is always the first angle to rotate with, then theta and lastly phi
-
-	 - psi for i
-     - theta for j
-     - phi  for k
-
- Licensed under http://opensource.org/licenses/BSD-3-Clause
+ - The math implementation is adopted from the Matlab-Function [SpinCalc](http://de.mathworks.com/matlabcentral/fileexchange/20696-function-to-convert-between-dcm--euler-angles--quaternions--and-euler-vectors) from J. Fuller. You can check the implementation against [WolframAlpha](https://www.wolframalpha.com/input/?i=quaternion:+0.7071%2B0i%2B0j%2B0.7071k) or the technical report of [J Diebel](https://scholar.google.de/scholar?cluster=3204262265835591787).
+ - more Info: [quat2eul.cpp](quat2eul.cpp)
 
 ---
 
-todo
- - The math implementation is adopted from the technical report of [J Diebel](https://scholar.google.de/scholar?cluster=3204262265835591787). It delivers same results as [MatLab](http://www.mathworks.com/help/robotics/ref/quat2eul.html) or [WolframAlpha](https://www.wolframalpha.com/input/?i=quaternion:+0.7071%2B0i%2B0j%2B0.7071k).
+ Licensed under http://opensource.org/licenses/BSD-3-Clause
 
- 
